@@ -1,141 +1,399 @@
 let angleMode = "DEG";
 
 
+// Display helpers
 function getDisplay() {
     return document.getElementById("display");
 }
 
-
-
-function appendNumber(number) {
-
-    const display = getDisplay();
-
-    display.value += number;
+function getHistory() {
+    return document.getElementById("history");
 }
 
 
+// Cursor helpers (Get the current cursor position.)
+function getCursorPosition() {
+    const display = getDisplay();
+    const selection =
+        window.getSelection();
 
+    if (!selection.rangeCount) {
+        return display.textContent.length;
+    }
+    const range =
+        selection.getRangeAt(0);
+
+    return range.startOffset;
+}
+
+// Cursor helpers (Place the cursor at a specific position in the display.)
+function setCursorPosition(position) {
+    const display = getDisplay();
+    const selection = window.getSelection();
+    const range = document.createRange();
+
+    range.selectNodeContents(display);
+    range.collapse(true);
+
+    if (display.firstChild) {
+        range.setStart(display.firstChild,Math.min(position,display.firstChild.length));
+    } 
+    else {
+        range.setStart(display, 0);
+    }
+
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    display.focus();
+}
+
+
+// Cursor helpers (Insert text exactly where the cursor is.)
+
+function insertText(text) {
+    const display = getDisplay();
+    const selection = window.getSelection();
+
+    if (!selection.rangeCount) {
+        display.textContent += text;
+        return;
+    }
+
+    const range = selection.getRangeAt(0);
+
+    range.deleteContents();
+
+    const textNode = document.createTextNode(text);
+
+    range.insertNode(textNode);
+    range.setStartAfter(textNode);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    display.focus();
+}
+
+
+// Numbers
+function appendNumber(number) {
+    insertText(number);
+}
+
+// Operators
 function appendOperator(operator) {
     const display = getDisplay();
-    if (operator === "*") {
-        display.value += "×";
-    } else if (operator === "/") {
-        display.value += "÷";
-    } else {
-        display.value += operator;
+    const value = display.textContent;
+
+    if (/[+\-×÷^]$/.test(value)) {
+        deleteLast();
     }
+
+
+    const symbol =
+        operator === "*"
+            ? "×"
+            : operator === "/"
+            ? "÷"
+            : operator;
+
+
+    insertText(symbol);
 }
 
 
-
+// Decimal point
 function appendDecimal() {
-    const display = getDisplay();
-    const parts =
-        display.value.split(/[+\-×÷^()]/);
-    const currentNumber =
-        parts[parts.length - 1];
-    if (!currentNumber.includes(".")) {
-        display.value += ".";
-    }
+    insertText(".");
 }
 
 
-
+// Scientific functions
 function appendFunction(func) {
-    const display = getDisplay();
     if (func === "square") {
-        display.value += "^2";
+        insertText("^2");
         return;
     }
+
+    if (func === "cube") {
+        insertText("^3");
+        return;
+    }
+
     if (func === "reciprocal") {
-        display.value += "^-1";
+        insertText("^-1");
         return;
     }
 
-    display.value += func + "(";
+    const functionText =
+        func + "()";
+
+    insertText(functionText);
+
+
+// Cursor helpers (Move cursor inside the parentheses.)
+
+    const display = getDisplay();
+    const position = display.textContent.length - 1;
+
+    setCursorPosition(position);
 }
 
 
-
+// Parentheses
 function appendParenthesis(parenthesis) {
-    const display = getDisplay();
-    display.value += parenthesis;
+    insertText(parenthesis);
 }
 
 
-
+// Constants
 function appendConstant(constant) {
-    const display = getDisplay();
-    display.value += constant;
+    insertText(constant);
 }
 
 
-
+// Square root
 function appendRoot() {
-    const display = getDisplay();
-    display.value += "√";
+    insertText("√");
 }
 
 
+// Cube root
+function appendCubeRoot() {
+    insertText("³√");
+}
 
+
+// Nth root
 function appendNthRoot() {
-    const display = getDisplay();
-    
-    let index = prompt("Enter the index of the root:");
+    const index = prompt("Enter the index of the root:");
+
     if (index === null) {
         return;
     }
-    index = index.trim();
-    if (index === "" || isNaN(index) || Number(index) < 2) {
+
+    if (index.trim() === "" ||
+        isNaN(index) ||
+        Number(index) < 2) {
+
         alert("Please enter an index of 2 or greater.");
         return;
     }
 
 
-    let radicand = prompt("Enter the radicand:");
-    if (radicand === null) {
-        return;
-    }
-    
-    radicand = radicand.trim();
-
-    if (radicand === "" || isNaN(radicand)) {
-        alert("Please enter a valid number.");
-        return;
-    }
-
-
-
-    const superscriptIndex =
-        toSuperscript(index);
-
-    display.value += superscriptIndex + "√" + radicand;
+    insertText(toSuperscript(index) + "√");
 }
 
 
-
+// Superscript conversion
 function toSuperscript(number) {
-    const normal =
-        "0123456789+-()";
-    const superScript =
-        "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁽⁾";
+    const normal = "0123456789+-()";
+    const superscript = "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻⁽⁾";
 
-    return String(number).split("").map(character => {
-            const index =
-                normal.indexOf(character);
-            if (index !== -1) {
-                return superScript[index];
-            }
-            return character;
+
+    return String(number)
+        .split("")
+        .map(character => {
+
+            const index = normal.indexOf(character);
+
+
+            return index >= 0
+                ? superscript[index]
+                : character;
+
         })
         .join("");
 }
 
 
+// Fraction insertion
+function insertFraction() {
+    const display = getDisplay();
+    const selection = window.getSelection();
+    const fraction = document.createElement("span");
 
-function convertNthRoots(expression) {
-    const superscriptMap = {
+    fraction.className = "fraction";
+
+    const numerator = document.createElement("span");
+    numerator.className = "numerator";
+    numerator.textContent = " ";
+
+    const denominator = document.createElement("span");
+    denominator.className = "denominator";
+    denominator.textContent = " ";
+
+    fraction.appendChild(numerator);
+    fraction.appendChild(denominator);
+
+    if (!selection.rangeCount) {
+        display.appendChild(fraction);
+        return;
+    }
+
+
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(fraction);
+
+
+// Cursor helpers (Put the cursor inside the numerator.)
+
+    const newRange = document.createRange();
+    newRange.selectNodeContents(numerator);
+    newRange.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    display.focus();
+}
+
+
+// Factorial insertion
+function factorial() {
+    insertText("!");
+}
+
+
+// Plus/minus toggle
+function toggleSign() {
+    const display = getDisplay();
+    const value = display.textContent;
+
+    if (value === "") {
+        return;
+    }
+
+    if (value.startsWith("-")) {
+        display.textContent = value.slice(1);
+
+    } else {
+        display.textContent = "-" + value;
+    }
+}
+
+
+// Percentage insertion
+function percent() {
+    insertText("%");
+}
+
+
+// Delete last character or selection
+function deleteLast() {
+    const display = getDisplay();
+    const selection = window.getSelection();
+
+    if (!selection.rangeCount) {
+        return;
+    }
+
+    const range = selection.getRangeAt(0);
+
+
+// Delete selected text if any
+    if (!range.collapsed) {
+        range.deleteContents();
+        return;
+    }
+
+
+// Delete the character before the cursor if no selection
+    if (range.startContainer.nodeType === Node.TEXT_NODE) {
+        const node = range.startContainer;
+        const position = range.startOffset;
+
+        if (position > 0) {
+            node.deleteData(
+                position - 1,
+                1
+            );
+        }
+    }
+}
+
+
+// Clear display and history
+function clearDisplay() {
+    getDisplay().textContent = "";
+    getHistory().textContent = "";
+}
+
+
+// Toggle angle mode between degrees(DEG) and radians(RAD)
+function toggleAngleMode() {
+    angleMode =
+        angleMode === "DEG"
+            ? "RAD" : "DEG";
+
+    document.getElementById("angleMode").textContent = angleMode;
+}
+
+
+// Trigonometric functions
+function sin(x) {
+    return angleMode === "DEG"
+        ? Math.sin(x * Math.PI / 180)
+        : Math.sin(x);
+}
+
+function cos(x) {
+    return angleMode === "DEG"
+        ? Math.cos(x * Math.PI / 180)
+        : Math.cos(x);
+}
+
+function tan(x) {
+    return angleMode === "DEG"
+        ? Math.tan(x * Math.PI / 180)
+        : Math.tan(x);
+}
+
+// Factorial calculation
+function factorialValue(number) {
+    number = Number(number);
+
+    if (!Number.isInteger(number) || number < 0) {
+        throw new Error("Invalid factorial");
+    }
+
+    let result = 1;
+
+    for (
+        let i = 2;
+        i <= number;
+        i++
+    ) {
+        result *= i;
+    }
+
+    return result;
+}
+
+
+// Root conversion
+function convertRoots(expression) {
+
+// Cube root.
+    expression = expression.replace(
+            /³√(\d+(?:\.\d+)?)/g,
+            "Math.cbrt($1)"
+        );
+
+// Square root.
+    expression = expression.replace(
+            /√(\d+(?:\.\d+)?)/g,
+            "Math.sqrt($1)"
+        );
+
+
+// Nth root.
+    const map = {
         "⁰": "0",
         "¹": "1",
         "²": "2",
@@ -148,18 +406,18 @@ function convertNthRoots(expression) {
         "⁹": "9"
     };
 
-    const pattern =
-        /([⁰¹²³⁴⁵⁶⁷⁸⁹]+)√(\d+(?:\.\d+)?)/g;
 
-    expression =
-        expression.replace(pattern,function(match, index, radicand) {
+    expression = expression.replace(
+            /([⁰¹²³⁴⁵⁶⁷⁸⁹]+)√(\d+(?:\.\d+)?)/g,
+
+            function(match,index,radicand) {
                 let normalIndex = "";
-                
-                for (let character of index) {
-                    normalIndex += superscriptMap[character];
+
+                for (const char of index) {
+                    normalIndex += map[char];
                 }
 
-                return ("(" + radicand +")**(1/" + normalIndex +")");
+                return ("(" + radicand +")**(1/" +normalIndex +")");
             }
         );
 
@@ -167,124 +425,26 @@ function convertNthRoots(expression) {
 }
 
 
-
-function convertSquareRoots(expression) {
-    const pattern =
-        /√(\d+(?:\.\d+)?)/g;
-    return expression.replace(pattern,"Math.sqrt($1)");
+// Factorial conversion
+function convertFactorials(expression) {
+    return expression.replace(
+        /(\d+(?:\.\d+)?)!/g,
+        "factorialValue($1)"
+    );
 }
 
 
-
-function clearDisplay() {
-    getDisplay().value = "";
-    document.getElementById("history").textContent = "";
-}
-
-
-
-function deleteLast() {
-    const display = getDisplay();
-    display.value = display.value.slice(0, -1);
-}
-
-
-
-function percent() {
-    const display = getDisplay();
-    if (display.value === "") {
-        return;
-    }
-
-    try {
-        const value = evaluateExpression(display.value);
-        display.value = value / 100;
-    } 
-    catch {
-        display.value = "Error";
-    }
-}
-
-
-
-function toggleSign() {
-    const display = getDisplay();
-    if (display.value === "") {
-        return;
-    }
-
-    if (display.value.startsWith("-")) {
-        display.value = display.value.slice(1);
-    } 
-    else {
-        display.value ="-" + display.value;
-    }
-}
-
-
-
-function toggleAngleMode() {
-
-    if (angleMode === "DEG") {
-        angleMode = "RAD";
-    } 
-    else {
-        angleMode = "DEG";
-    }
-
-    document.getElementById("angleMode").textContent = angleMode;
-}
-
-
-
-
-function sin(x) {
-
-    if (angleMode === "DEG") {
-        return Math.sin(
-            x * Math.PI / 180
-        );
-    }
-    return Math.sin(x);
-}
-
-
-function cos(x) {
-
-    if (angleMode === "DEG") {
-        return Math.cos(
-            x * Math.PI / 180
-        );
-    }
-    return Math.cos(x);
-}
-
-
-function tan(x) {
-
-    if (angleMode === "DEG") {
-        return Math.tan(
-            x * Math.PI / 180
-        );
-    }
-    return Math.tan(x);
-}
-
-
-
+// Evaluate the mathematical expression
 function evaluateExpression(expression) {
 
+// Roots.
+    expression = convertRoots(expression);
 
-    expression =
-        convertNthRoots(expression);
+// Factorials.
+    expression = convertFactorials(expression);
 
-
-    expression =
-        convertSquareRoots(expression);
-
-
-    expression =
-        expression
+// Calculator symbols (operators and constants)
+    expression = expression
             .replace(/×/g, "*")
             .replace(/÷/g, "/")
             .replace(/\^/g, "**")
@@ -292,56 +452,47 @@ function evaluateExpression(expression) {
             .replace(/\be\b/g, "Math.E");
 
 
-    expression =
-        expression
-            .replace(/sin\(/g, "sin(")
-            .replace(/cos\(/g, "cos(")
-            .replace(/tan\(/g, "tan(")
-            .replace(/log\(/g, "Math.log10(")
-            .replace(/ln\(/g, "Math.log(");
+// Logarithims
+    expression = expression
+            .replace(/log\(/g,"Math.log10(")
+            .replace(/ln\(/g,"Math.log(");
 
+
+// Evaluate
     return eval(expression);
 }
 
 
-
+// Calculate the result and update the display and history
 function calculate() {
     const display = getDisplay();
-    const history =
-        document.getElementById("history");
-    if (display.value === "") {
+    const history = getHistory();
+    const expression = display.textContent;
+
+    if (expression.trim() === "") {
         return;
     }
 
-
+// Save history before calculation
     try {
+        history.textContent = expression;
 
-        const originalExpression =
-            display.value;
+// Calculate the result 
+        const result = evaluateExpression(expression);
 
-        history.textContent =
-            originalExpression;
-
-        const result =
-            evaluateExpression(
-                display.value
-            );
-
+// Check for finite result
         if (!Number.isFinite(result)) {
-            display.value = "Error";
+            display.textContent = "Error";
             return;
         }
 
-        display.value =
-            Number(
-                result.toFixed(12)
-            );
 
-    }
-
-
+// Limit floating-point precision to 12 decimal places 
+        display.textContent = Number(result.toFixed(12));
+    } 
     catch (error) {
-        console.error(error);
-        display.value = "Error";
+        console.error("Calculation error:",error);
+
+        display.textContent = "Error";
     }
 }
