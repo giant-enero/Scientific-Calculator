@@ -12,78 +12,82 @@
 
 
 <body>
-    
 
-<div class="calculator">
+    <div class="calculator">
 
-    <div class="display">
 
-        <div id="history"></div>
 
-        <input
-            type="text"
-            id="display"
-            placeholder="0"
-            readonly>
+        <div class="display">
+
+            <div id="history"></div>
+
+            <div
+                id="display"
+                contenteditable="true"
+                spellcheck="false"
+                aria-label="Calculator display">
+            </div>
+
+        </div>
+
+
+      
+        <div class="buttons">
+
+            <button id="angleMode" onclick="toggleAngleMode()">DEG</button>
+            <button onclick="appendFunction('sin')">sin</button>
+            <button onclick="appendFunction('cos')">cos</button>
+            <button onclick="appendFunction('tan')">tan</button>
+            <button onclick="factorial()">!</button>
+
+            <button onclick="insertFraction()">a/b</button>
+            <button onclick="appendRoot()">√</button>
+            <button onclick="appendCubeRoot()">³√</button>
+            <button onclick="appendNthRoot()">ⁿ√</button>
+            <button onclick="appendFunction('reciprocal')">1/x</button>
+
+            <button onclick="appendFunction('square')">x²</button>
+            <button onclick="appendFunction('cube')">x³</button>
+            <button onclick="appendOperator('^')">xʸ</button>
+            <button onclick="appendFunction('ln')">ln</button>
+            <button onclick="appendFunction('log')">log</button>
+
+            <button onclick="appendConstant('e')">e</button>
+            <button onclick="appendParenthesis('(')">(</button>
+            <button onclick="appendParenthesis(')')">)</button>
+            <button onclick="toggleSign()">±</button>
+            <button onclick="percent()">%</button>
+
+            <button class="number" onclick="appendNumber('7')">7</button>
+            <button class="number" onclick="appendNumber('8')">8</button>
+            <button class="number" onclick="appendNumber('9')">9</button>
+            <button id="delete" onclick="deleteLast()">DE</button>
+            <button id="clear" onclick="clearDisplay()">AC</button>
+
+            <button class="number" onclick="appendNumber('4')">4</button>
+            <button class="number" onclick="appendNumber('5')">5</button>
+            <button class="number" onclick="appendNumber('6')">6</button>
+            <button class="operator" onclick="appendOperator('*')">×</button>
+            <button class="operator" onclick="appendOperator('/')">÷</button>
+
+            <button class="number" onclick="appendNumber('1')">1</button>
+            <button class="number" onclick="appendNumber('2')">2</button>
+            <button class="number"onclick="appendNumber('3')">3</button>
+            <button class="operator" onclick="appendOperator('+')">+</button>
+            <button class="operator" onclick="appendOperator('-')">−</button>
+
+            <button class="number" onclick="appendNumber('0')">0</button>
+            <button class="number" onclick="appendNumber('00')">00</button>
+            <button class="number" onclick="appendDecimal()">.</button>
+            <button class="number" onclick="appendConstant('π')">π</button>
+            <button class="operator equals" onclick="calculate()">=</button>
+
+        </div>
 
     </div>
 
 
-    <div class="buttons">
-
-        <button id="angleMode" onclick="toggleAngleMode()">DEG</button>
-
-        <button onclick="appendFunction('sin')">sin</button>
-        <button onclick="appendFunction('cos')">cos</button>
-        <button onclick="appendFunction('tan')">tan</button>
-
-        <button onclick="appendFunction('log')">log</button>
-        <button onclick="appendFunction('ln')">ln</button>
-        <button onclick="appendRoot()">√</button>
-        <button onclick="appendNthRoot()">ⁿ√x</button>
-
-        <button onclick="appendFunction('square')">x²</button>
-        <button onclick="appendOperator('^')">xʸ</button>
-        <button onclick="appendFunction('reciprocal')">1/x</button>
-        <button onclick="appendConstant('π')">π</button>
-
-        <button onclick="appendConstant('e')">e</button>
-        <button onclick="appendParenthesis('(')">(</button>
-        <button onclick="appendParenthesis(')')">)</button>
-        <button onclick="toggleSign()">±</button>
-
-        <button id="clear" onclick="clearDisplay()">AC</button>
-        <button id="delete" onclick="deleteLast()">DE</button>
-        <button onclick="percent()">%</button>
-        <button class="operator" onclick="appendOperator('/')">÷</button>
-
-        <button class="number" onclick="appendNumber('7')">7</button>
-        <button class="number" onclick="appendNumber('8')">8</button>
-        <button class="number" onclick="appendNumber('9')">9</button>
-        <button class="operator" onclick="appendOperator('*')">×</button>
-
-
-        <button class="number" onclick="appendNumber('4')">4</button>
-        <button class="number" onclick="appendNumber('5')">5</button>
-        <button class="number" onclick="appendNumber('6')">6</button>
-        <button class="operator" onclick="appendOperator('-')">−</button>
-
-        <button class="number" onclick="appendNumber('1')">1</button>
-        <button class="number" onclick="appendNumber('2')">2</button>
-        <button class="number" onclick="appendNumber('3')">3</button>
-        <button class="operator" onclick="appendOperator('+')">+</button>
-
-        <button class="number" onclick="appendNumber('00')">00</button>
-        <button class="number" onclick="appendNumber('0')">0</button>
-        <button onclick="appendDecimal()">.</button>
-        <button class="operator equals" onclick="calculate()">=</button>
-
-    </div>
-
-</div>
-
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 
 </body>
 
